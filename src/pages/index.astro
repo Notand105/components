@@ -1,0 +1,16 @@
+---
+import Layout from "../layouts/Layout.astro"
+import Basicdiv from "../components/Basicdiv.svelte"
+import ColorPicker from '../components/ColorPicker.svelte'
+---
+
+<Layout title="hola" >
+	<h1>Componentes</h1>
+	<ColorPicker client:load />
+	<div>
+		<object data="patosazules.txt">
+			Not supported
+		</object>
+		<Basicdiv client:load />
+	</div>
+</Layout>
