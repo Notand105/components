@@ -103,31 +103,47 @@
         }
     }
 
-    function autoPlay() {
+    function autoPlay(keep: boolean) {
         for (let i = 0; i < limit; i++) {
-            setTimeout(() => {
+            //setTimeout(() => {
+            if (keep) {
                 selectDoor(1);
                 pickDoor();
                 //changeOption();
-                checkWin()
+                checkWin();
                 reset(quant);
-            }, 200);
+            } else {
+                selectDoor(1);
+                pickDoor();
+                changeOption();
+                reset(quant);
+            }
+
+            //}, 100);
         }
+    }
+
+    function resetScore() {
+        played = 0;
+        won = 0;
     }
 </script>
 
 <section class="">
-    <h1>Paradox Game</h1>
+    <h1>Monty Hall problem</h1>
     <input type="number" bind:value={quant} />
     <div style="display:flex;flex-direction:column">
         <span>won games: {won}</span>
         <span>played games: {played}</span>
+        <button style="width:200px;" on:click={resetScore}>Reset score</button>
         {#if won / played}
             <span>rate: {100 * (won / played)}%</span>
+        {:else}
+            <span>rate: 0%</span>
         {/if}
     </div>
-    <button on:click={() => reset(quant)}>Play again</button>
-    <button on:click={autoPlay}>AutoPlay</button>
+    <button on:click={() => autoPlay(true)}>AutoPlay keeping door</button>
+    <button on:click={() => autoPlay(false)}>AutoPlay changing door</button>
     <div class="game">
         <div class="cont">
             {#each doors as doo}
@@ -153,7 +169,7 @@
         </div>
         <div class="controls">
             {#if !selected}
-                <h2>Select a door</h2>
+                <h3>Select a door</h3>
             {/if}
             {#if selected != 0 && !picked}
                 <h3>You selected door number {selected}</h3>
@@ -167,6 +183,7 @@
             {#if win !== ""}
                 <h3>You selected door number {selected}</h3>
                 {win}
+                <button on:click={() => reset(quant)}>Play again</button>
             {/if}
         </div>
     </div>
