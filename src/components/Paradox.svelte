@@ -1,0 +1,241 @@
+<script lang="ts">
+    import type { Door } from "../components/types";
+    let doors: Door[] = [];
+    let selected = 0;
+    let picked = false;
+    let win: string = "";
+    let quant = 3;
+    let played = 0;
+    let won = 0;
+    let limit = 1000;
+    fillDoors(quant);
+    generatePrize();
+
+    function fillDoors(max: number) {
+        doors = [];
+        for (let i = 1; i <= max; i++) {
+            let door: Door = {
+                id: i,
+                selected: false,
+                prize: false,
+                open: false,
+                option: false,
+            };
+            door.id = i;
+            doors = [...doors, door];
+        }
+    }
+
+    function generatePrize() {
+        let ranIndex = Math.floor(Math.random() * doors.length);
+        console.log(ranIndex);
+        if (doors[ranIndex]) {
+            doors[ranIndex].prize = true;
+        }
+    }
+    function selectDoor(index: number) {
+        if (picked) return;
+        //we delete last selected door
+        selected = index;
+        for (let i = 1; i <= doors.length; i++) {
+            doors[i - 1].selected = false;
+        }
+        //then select the one
+        for (let i = 1; i <= doors.length; i++) {
+            if (index == i) {
+                doors[i - 1].selected = true;
+            }
+        }
+    }
+
+    function pickDoor() {
+        //open every non-selected and non-prize door if the one selected has the prize leave one closed
+        picked = true;
+        let aux: number = -1;
+        if (doors[selected - 1].prize) {
+            do aux = Math.floor(Math.random() * doors.length);
+            while (aux == selected - 1);
+        }
+        for (let i = 0; i < doors.length; i++) {
+            if (!doors[i].prize && !doors[i].selected && !(i == aux)) {
+                doors[i].open = true;
+            }
+        }
+    }
+
+    function changeOption() {
+        for (let i = 1; i <= doors.length; i++) {
+            if (!doors[i - 1].selected && !doors[i - 1].open) {
+                doors[selected - 1].selected = false;
+                doors[i - 1].selected = true;
+                selected = i;
+                break;
+            }
+        }
+        checkWin();
+    }
+
+    function checkWin() {
+        played++;
+        let aux = doors[selected - 1].prize;
+        if (aux) {
+            win = "You Won!";
+            won++;
+        } else {
+            win = "You Lost";
+        }
+        openAll();
+    }
+
+    function reset(amount: number) {
+        doors = [];
+        selected = 0;
+        picked = false;
+        win = "";
+
+        fillDoors(amount);
+        generatePrize();
+    }
+
+    function openAll() {
+        for (let i = 0; i < doors.length; i++) {
+            doors[i].open = true;
+        }
+    }
+
+    function autoPlay() {
+        for (let i = 0; i < limit; i++) {
+            setTimeout(() => {
+                selectDoor(1);
+                pickDoor();
+                //changeOption();
+                checkWin()
+                reset(quant);
+            }, 200);
+        }
+    }
+</script>
+
+<section class="">
+    <h1>Paradox Game</h1>
+    <input type="number" bind:value={quant} />
+    <div style="display:flex;flex-direction:column">
+        <span>won games: {won}</span>
+        <span>played games: {played}</span>
+        {#if won / played}
+            <span>rate: {100 * (won / played)}%</span>
+        {/if}
+    </div>
+    <button on:click={() => reset(quant)}>Play again</button>
+    <button on:click={autoPlay}>AutoPlay</button>
+    <div class="game">
+        <div class="cont">
+            {#each doors as doo}
+                <div class="wrapper" class:selected={doo.selected}>
+                    <button
+                        class="door doora"
+                        class:open={doo.open}
+                        on:click={() => selectDoor(doo.id)}
+                    >
+                        <span class="doorframe">
+                            {doo.id}
+                        </span>
+                    </button>
+                    <div class="back">
+                        {#if doo.prize}
+                            <img src="money.svg" alt="prize" />
+                        {:else}
+                            <img src="/trash.svg" alt="empty" />
+                        {/if}
+                    </div>
+                </div>
+            {/each}
+        </div>
+        <div class="controls">
+            {#if !selected}
+                <h2>Select a door</h2>
+            {/if}
+            {#if selected != 0 && !picked}
+                <h3>You selected door number {selected}</h3>
+                <button on:click={pickDoor}>confirm</button>
+            {/if}
+            {#if picked && win === ""}
+                <h3>You selected door number {selected}</h3>
+                <button on:click={changeOption}> change door </button>
+                <button on:click={checkWin}> keep your choice </button>
+            {/if}
+            {#if win !== ""}
+                <h3>You selected door number {selected}</h3>
+                {win}
+            {/if}
+        </div>
+    </div>
+</section>
+
+<style>
+    img {
+        width: 100%;
+    }
+    .wrapper {
+        position: relative;
+        display: flex;
+    }
+    .door {
+        height: 200px;
+        flex: 1;
+        min-width: 120px;
+        max-width: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        position: relative;
+        background-color: #cccccc;
+    }
+    .back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: -1;
+    }
+    .cont {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        width: 60%;
+    }
+    .selected {
+        border: 5px solid rgb(240, 160, 160);
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+    .game {
+        display: flex;
+        flex-wrap: wrap;
+        margin: auto;
+        justify-content: center;
+        gap: 4rem;
+    }
+    .open {
+        perspective: 1000px;
+        transform-style: preserve-3d;
+        transform: rotateY(-75deg);
+        transition: 0.6s ease;
+        transform-origin: left;
+    }
+    .controls {
+        min-width: 30%;
+        right: 0;
+        top: 30%;
+        z-index: 10;
+        background-color: white;
+        padding: 1rem;
+    }
+</style>
