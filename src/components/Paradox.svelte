@@ -8,8 +8,11 @@
     let played = 0;
     let won = 0;
     let limit = 1000;
+    let simulate = false;
     fillDoors(quant);
     generatePrize();
+
+    $: reset(quant);
 
     function fillDoors(max: number) {
         doors = [];
@@ -105,13 +108,11 @@
 
     function autoPlay(keep: boolean) {
         for (let i = 0; i < limit; i++) {
-            //setTimeout(() => {
             if (keep) {
                 selectDoor(1);
                 pickDoor();
-                //changeOption();
                 checkWin();
-                reset(quant);
+                reset(quant)
             } else {
                 selectDoor(1);
                 pickDoor();
@@ -119,8 +120,11 @@
                 reset(quant);
             }
 
-            //}, 100);
         }
+    }
+    function toggleMode(boo:boolean){
+        simulate = boo 
+        reset(quant)
     }
 
     function resetScore() {
@@ -131,20 +135,7 @@
 
 <section class="">
     <h1>Monty Hall problem</h1>
-    <input type="number" bind:value={quant} />
-    <div style="display:flex;flex-direction:column">
-        <span>won games: {won}</span>
-        <span>played games: {played}</span>
-        <button style="width:200px;" on:click={resetScore}>Reset score</button>
-        {#if won / played}
-            <span>rate: {100 * (won / played)}%</span>
-        {:else}
-            <span>rate: 0%</span>
-        {/if}
-    </div>
-    <button on:click={() => autoPlay(true)}>AutoPlay keeping door</button>
-    <button on:click={() => autoPlay(false)}>AutoPlay changing door</button>
-    <div class="game">
+    <div class="game elec">
         <div class="cont">
             {#each doors as doo}
                 <div class="wrapper" class:selected={doo.selected}>
@@ -167,35 +158,99 @@
                 </div>
             {/each}
         </div>
-        <div class="controls">
-            {#if !selected}
-                <h3>Select a door</h3>
+        <div>
+            <div>
+                <button disabled={!simulate} on:click={()=>toggleMode(false)}
+                    >Play</button
+                >
+                <button disabled={simulate} on:click={()=>toggleMode(true)}
+                    >Simulate</button
+                >
+            </div>
+            <div class="ooo">
+                {#if simulate}
+                    <div class="simulate">
+                        <button on:click={() => autoPlay(true)}
+                            >AutoPlay keeping door</button
+                        >
+                        <button on:click={() => autoPlay(false)}
+                            >AutoPlay changing door</button
+                        >
+                    </div>
+                {:else}
+                    <div class="controls">
+                        {#if !selected}
+                            <h3>Select a door</h3>
+                        {/if}
+                        {#if selected != 0 && !picked}
+                            <h3>You selected door number {selected}</h3>
+                            <button on:click={pickDoor}>confirm</button>
+                        {/if}
+                        {#if picked && win === ""}
+                            <h3>You selected door number {selected}</h3>
+                            <button on:click={changeOption}>
+                                change door
+                            </button>
+                            <button on:click={checkWin}>
+                                keep your choice
+                            </button>
+                        {/if}
+                        {#if win !== ""}
+                            <h3>You selected door number {selected}</h3>
+                            {win}
+                            <button on:click={() => reset(quant)}
+                                >Play again</button
+                            >
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+    <div class="misc">
+        <div style="display:flex;flex-direction:column">
+            <span>won games: {won}</span>
+            <span>played games: {played}</span>
+
+            {#if won / played}
+                <span>rate: {100 * (won / played)}%</span>
+            {:else}
+                <span>rate: 0%</span>
             {/if}
-            {#if selected != 0 && !picked}
-                <h3>You selected door number {selected}</h3>
-                <button on:click={pickDoor}>confirm</button>
-            {/if}
-            {#if picked && win === ""}
-                <h3>You selected door number {selected}</h3>
-                <button on:click={changeOption}> change door </button>
-                <button on:click={checkWin}> keep your choice </button>
-            {/if}
-            {#if win !== ""}
-                <h3>You selected door number {selected}</h3>
-                {win}
-                <button on:click={() => reset(quant)}>Play again</button>
-            {/if}
+            <span>
+                amount of doors
+                <input type="number" bind:value={quant} />
+            </span>
+            <button style="width:200px;" on:click={resetScore}
+                >Reset score</button
+            >
         </div>
     </div>
 </section>
 
 <style>
+    .misc {
+        width: 100%;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
     img {
         width: 100%;
     }
     .wrapper {
         position: relative;
         display: flex;
+    }
+    .ooo {
+        background-color: khaki;
+        width: 100%;
+        height: 100%;
+        min-height: 120px;
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
     }
     .door {
         height: 200px;
@@ -208,6 +263,10 @@
         padding: 1rem;
         position: relative;
         background-color: #cccccc;
+    }
+    .elec {
+        display: flex;
+        flex-direction: column;
     }
     .back {
         position: absolute;
@@ -236,7 +295,6 @@
     .game {
         display: flex;
         flex-wrap: wrap;
-        margin: auto;
         justify-content: center;
         gap: 4rem;
     }
@@ -252,7 +310,6 @@
         right: 0;
         top: 30%;
         z-index: 10;
-        background-color: white;
         padding: 1rem;
     }
 </style>
