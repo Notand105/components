@@ -158,7 +158,7 @@
                 </div>
             {/each}
         </div>
-        <div>
+        <div class="al">
             <div>
                 <button disabled={!simulate} on:click={()=>toggleMode(false)}
                     >Play</button
@@ -229,6 +229,11 @@
 </section>
 
 <style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
     .misc {
         width: 100%;
         justify-content: center;
@@ -239,18 +244,22 @@
     img {
         width: 100%;
     }
+    .al{
+        width: 100%;
+        padding: 0rem 3rem 3rem 1rem;
+    }
     .wrapper {
         position: relative;
         display: flex;
     }
     .ooo {
-        background-color: khaki;
-        width: 100%;
-        height: 100%;
-        min-height: 120px;
         justify-content: center;
         display: flex;
+        align-items: center;
         flex-direction: column;
+        margin: auto;
+        background-color: #242424;
+        height: 200px;
     }
     .door {
         height: 200px;
@@ -286,7 +295,7 @@
         gap: 1rem;
         justify-content: center;
         align-items: center;
-        width: 60%;
+        width: 100%;
     }
     .selected {
         border: 5px solid rgb(240, 160, 160);
@@ -297,6 +306,8 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 4rem;
+        width: 90%;
+        margin: auto;
     }
     .open {
         perspective: 1000px;
